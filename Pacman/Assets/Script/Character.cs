@@ -53,7 +53,11 @@ public class Character : MonoBehaviour
             {
                 enemyScript.killEnemy();
             }
-            RestartGame();
+            else
+            {
+                RestartGame();
+            }
+                
         }
     }
     private System.Collections.IEnumerator PowerUp()

@@ -16,6 +16,12 @@ public class EnemyScript : MonoBehaviour
     private Material week_mat;
 
     private Renderer rend;
+
+    private bool isDead = false;
+
+    [SerializeField]
+    float speed = 7;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -39,21 +45,30 @@ public class EnemyScript : MonoBehaviour
 
     private System.Collections.IEnumerator Freeze()
     {
-        float temp = 0f;
-        temp = agent.speed;
-
         agent.speed = 0f;
         rend.material = week_mat;
 
         yield return new WaitForSeconds(3f);
+        if (isDead == false)
+        {
+            agent.speed = speed;
+            rend.material = normal_mat;
+        }
 
-        agent.speed = temp;
-        rend.material = normal_mat;
+
+            
     }
     private System.Collections.IEnumerator Killed()
     {
+        isDead = true;
+        agent.enabled = false;
         transform.position = new Vector3(0f, 0.5f, -3.86f);
+        agent.enabled = true;
         agent.speed = 0f;
         yield return new WaitForSeconds(5f);
+
+        isDead = false;
+        agent.speed = speed;
+        rend.material = normal_mat;
     }
 }
