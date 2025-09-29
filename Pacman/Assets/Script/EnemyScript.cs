@@ -18,12 +18,11 @@ public class EnemyScript : MonoBehaviour
     private Material week_mat;
 
     private Renderer rend;
-    private bool isPlayerPowerUp = false;
-
-    private bool isDead = false;
 
     [SerializeField]
     float speed = 7;
+
+    private EnemyState enemyState = EnemyState.Normal;
 
     private void OnEnable()
     {
@@ -45,12 +44,24 @@ public class EnemyScript : MonoBehaviour
     void Update()
     {
         agent.SetDestination(player.transform.position);
+        switch (enemyState)
+        {
+            case EnemyState.Normal:
+                agent.speed = speed;
+                rend.material = normal_mat;
+                break;
+
+            case EnemyState.Week:
+                Freeze();
+                break;
+
+            case EnemyState.Dead:
+                killEnemy();
+                break;
+        }
     }
 
-    public void FreezeEnemy()
-    {
-        StartCoroutine(Freeze());
-    }
+
     public void killEnemy()
     {
         StartCoroutine(Killed());
@@ -60,12 +71,11 @@ public class EnemyScript : MonoBehaviour
     {
         if(state == PlayerState.Invincible)
         {
-            isPlayerPowerUp = true;
-            FreezeEnemy();
+            enemyState = EnemyState.Week;
         }
         else if(state == PlayerState.Normal)
         {
-            isPlayerPowerUp = false;
+            enemyState = EnemyState.Normal;
         }
     }
 
@@ -73,9 +83,9 @@ public class EnemyScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            if(isPlayerPowerUp == true)
+            if(enemyState == EnemyState.Week)
             {
-                killEnemy();
+                enemyState = EnemyState.Dead;
             }
             else {
                 GameStateNotifier.GameStateChange(GameState.Reset);
@@ -83,29 +93,28 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator Freeze()
+    private void Freeze()
     {
         agent.speed = 0f;
-        rend.material = week_mat;
-
-        yield return new WaitForSeconds(3f);
-        if (isDead == false)
-        {
-            agent.speed = speed;
-            rend.material = normal_mat;
-        }       
+        rend.material = week_mat;   
     }
+
     private System.Collections.IEnumerator Killed()
     {
-        isDead = true;
+        enemyState = EnemyState.Normal;
         agent.enabled = false;
         transform.position = new Vector3(0f, 0.5f, -3.86f);
         agent.enabled = true;
         agent.speed = 0f;
         yield return new WaitForSeconds(5f);
 
-        isDead = false;
         agent.speed = speed;
         rend.material = normal_mat;
+    }
+    private enum EnemyState
+    {
+        Normal,
+        Week,
+        Dead
     }
 }
