@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
+using static GameStateNotifier;
+using static PlayerStateNotifier;
 
 public class EnemyScript : MonoBehaviour
 {
@@ -16,11 +18,22 @@ public class EnemyScript : MonoBehaviour
     private Material week_mat;
 
     private Renderer rend;
+    private bool isPlayerPowerUp = false;
 
     private bool isDead = false;
 
     [SerializeField]
     float speed = 7;
+
+    private void OnEnable()
+    {
+        PlayerStateNotifier.OnPlayerStateChange += PlayerChange;
+    }
+
+    private void OnDisable()
+    {
+        PlayerStateNotifier.OnPlayerStateChange -= PlayerChange;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -43,6 +56,33 @@ public class EnemyScript : MonoBehaviour
         StartCoroutine(Killed());
     }
 
+    private void PlayerChange(PlayerState state)
+    {
+        if(state == PlayerState.Invincible)
+        {
+            isPlayerPowerUp = true;
+            FreezeEnemy();
+        }
+        else if(state == PlayerState.Normal)
+        {
+            isPlayerPowerUp = false;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            if(isPlayerPowerUp == true)
+            {
+                killEnemy();
+            }
+            else {
+                GameStateNotifier.GameStateChange(GameState.Reset);
+            }
+        }
+    }
+
     private System.Collections.IEnumerator Freeze()
     {
         agent.speed = 0f;
@@ -53,10 +93,7 @@ public class EnemyScript : MonoBehaviour
         {
             agent.speed = speed;
             rend.material = normal_mat;
-        }
-
-
-            
+        }       
     }
     private System.Collections.IEnumerator Killed()
     {

@@ -14,15 +14,27 @@ public class ScoreManager : MonoBehaviour
         scoreText.text = "SCORE: " + score.ToString();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
     {
-        
+        ItemCollectNotifier.OnItemCollected += ItemPickUp;
     }
 
-    public void AddScore()
+    private void OnDisable()
     {
-        score += 100;
+        ItemCollectNotifier.OnItemCollected -= ItemPickUp;
+
+    }
+
+    public void ItemPickUp(ItemType type)
+    {
+        if (type == ItemType.Coin)
+        {
+            score += 100;
+        }
+        else if(type == ItemType.PowerUp)
+        {
+            score += 500;
+        }
         scoreText.text = "SCORE: " + score.ToString();
     }
 }
