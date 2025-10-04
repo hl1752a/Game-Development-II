@@ -33,7 +33,7 @@ public class Character_Observer : MonoBehaviour
         if (other.gameObject.CompareTag("PowerUp"))
         {
             ItemCollectNotifier.ItemCollected(ItemType.PowerUp);
-            StartCoroutine(PowerUp());
+            StartCoroutine(PowerUpTimer());
 
         }
         if (other.gameObject.CompareTag("Coin"))
@@ -42,7 +42,7 @@ public class Character_Observer : MonoBehaviour
 
         }
     }
-    private System.Collections.IEnumerator PowerUp()
+    private System.Collections.IEnumerator PowerUpTimer()
     {
         PlayerStateNotifier.PlayerStateChange(PlayerState.Invincible);
         yield return new WaitForSeconds(3f);

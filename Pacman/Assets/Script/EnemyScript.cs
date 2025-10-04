@@ -49,18 +49,36 @@ public class EnemyScript : MonoBehaviour
             case EnemyState.Normal:
                 agent.speed = speed;
                 rend.material = normal_mat;
+                if (playerState == PlayerState.Invincible)
+                {
+                    enemyState = EnemyState.Week;
+                }
                 break;
 
             case EnemyState.Week:
                 Freeze();
+                if (isBeingKilled)
+                {
+                    StartCoroutine(Killed());
+                    enemyState = EnemyState.Dead;
+                }
+                if (PlayerState == PlayerState.Normal)
+                {
+                    enemyState = EnemyState.Week;
+                }
                 break;
+               
 
             case EnemyState.Dead:
-                killEnemy();
+                //killEnemy();
+                if (isBeingKilled)
+                {
+                    isBeingKilled = false;
+                    enemyState = EnemyState.Normal;
+                }
                 break;
         }
     }
-
 
     public void killEnemy()
     {
@@ -69,14 +87,7 @@ public class EnemyScript : MonoBehaviour
 
     private void PlayerChange(PlayerState state)
     {
-        if(state == PlayerState.Invincible)
-        {
-            enemyState = EnemyState.Week;
-        }
-        else if(state == PlayerState.Normal)
-        {
-            enemyState = EnemyState.Normal;
-        }
+        playerState = state;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -85,7 +96,8 @@ public class EnemyScript : MonoBehaviour
         {
             if(enemyState == EnemyState.Week)
             {
-                enemyState = EnemyState.Dead;
+                isbeingkilled = true;
+                //enemyState = EnemyState.Dead;
             }
             else {
                 GameStateNotifier.GameStateChange(GameState.Reset);
@@ -108,7 +120,7 @@ public class EnemyScript : MonoBehaviour
         agent.speed = 0f;
         yield return new WaitForSeconds(5f);
 
-        agent.speed = speed;
+        agent.speed = speed; //the coroutine needs to inform state that it is exiting to normal
         rend.material = normal_mat;
     }
     private enum EnemyState
