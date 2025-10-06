@@ -3,13 +3,13 @@ using UnityEngine.Tilemaps;
 using Newtonsoft.Json;
 using System.IO;
 
-[System.Serializable]
+
 public class RoadData
 {
     public int[][] roadGrid;
 }
 
-public class RoadExtractor : MonoBehaviour
+public class GridFileGenerateor : MonoBehaviour
 {
     private Tilemap tilemap;
     public RuleTile roadTile;

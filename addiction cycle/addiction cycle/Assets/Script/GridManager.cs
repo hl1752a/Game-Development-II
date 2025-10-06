@@ -1,12 +1,8 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class GridManager : GridReader
+public class GridManager : MonoBehaviour
 {
-    protected override void Awake()
-    {
-        base.Awake();
-    }
     protected int[][] testDirections = new int[][]
     {
         new int[] {-1, 0}, // left (x-1, y)
@@ -16,65 +12,142 @@ public class GridManager : GridReader
     };
 
     [SerializeField] private Tilemap buildingTilemap;   // buildings
-    [SerializeField] private Tilemap roadTilemap;       // road
+    [SerializeField] protected Tilemap roadTilemap;       // road
     [SerializeField] private Tilemap previewTilemap;    // ghost preview
 
     [SerializeField] private TileBase[] buildingTile;
     [SerializeField] private TileBase previewTile;     // Semi-transparent version
 
-    private Vector3Int currentCellPos = new Vector3Int(0, 0, 0);
+    protected Vector3Int currentMouseWorldCellPos = new Vector3Int(0, 0, 0);
     private Vector3 mouseWorldPos = new Vector3(0, 0, 0);
-    private bool isOccupied = true;
+    private bool isEmptyCell = true;
+    private bool isNextRoad = false;
+    private bool isBuilding = false;
 
     private int selectedIndex = 2;
 
-    void Start()
+    void Awake()
     {
-        
+        GridDataHandler.LoadRoad();
     }
 
     // Update is called once per frame
     void Update()
     {
         mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        currentCellPos = buildingTilemap.WorldToCell(mouseWorldPos);
-        isOccupied = ShowPreview();
-        if (Input.GetMouseButtonDown(0) && !isOccupied)
+        currentMouseWorldCellPos = buildingTilemap.WorldToCell(mouseWorldPos);
+
+        previewTilemap.ClearAllTiles(); //clear preview
+
+        isNextRoad = IsNextToRoad();
+        isEmptyCell = IsEmptyCell();
+        isBuilding = IsBuilding();
+
+        if (isEmptyCell && isNextRoad)
         {
-            PlaceTile();
+            //preview
+            previewTilemap.SetTile(currentMouseWorldCellPos, previewTile);
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                PlaceTile(selectedIndex);
+            }
+        }
+        else if(IsBuilding())
+        {
+            if (Input.GetMouseButtonDown(1))
+            {
+                RemoveTile();
+            }
         }
     }
-
-    protected Vector2Int CellPosConvert(Vector3Int originalPos)
+    /// <summary>
+    /// Safely get the value at (x, y) from the road grid.
+    /// Returns -1 if out of bounds.
+    /// </summary>
+    protected int GetGridAt(int x, int y)
     {
-        return new Vector2Int(originalPos.x+5, originalPos.y+5);
+        // Flip upside down
+        /*for (int i = 0; i < roadGrid.Length / 2; i++)
+        {
+            int[] temp = roadGrid[i];
+            roadGrid[i] = roadGrid[roadGrid.Length - 1 - i];
+            roadGrid[roadGrid.Length - 1 - i] = temp;
+        }*/
+
+        if (GridDataHandler.gameGrid == null) return -1;
+
+        if (y < 0 || y >= GridDataHandler.gameGrid.Length) return -1;
+        if (x < 0 || x >= GridDataHandler.gameGrid[y].Length) return -1;
+
+        return GridDataHandler.gameGrid[y][x]; // correct indexing
     }
 
-    protected void GridUpdate()
+    protected Vector2Int WorldCellToFileCell(Vector3Int pos)
     {
-
+        return new Vector2Int(pos.x+5, pos.y+5);
     }
 
-    private bool ShowPreview()
+    private void PlaceTile(int index)
     {
-        previewTilemap.ClearAllTiles();
+        if (index < 0) return;
+        buildingTilemap.SetTile(currentMouseWorldCellPos, buildingTile[index]);
+        GridDataHandler.GridUpdate(WorldCellToFileCell(currentMouseWorldCellPos), index);
+    }
 
-        // Don¡¯t preview if already occupied
-        if (buildingTilemap.HasTile(currentCellPos) || roadTilemap.HasTile(currentCellPos))
+    private void RemoveTile()
+    {
+        buildingTilemap.SetTile(currentMouseWorldCellPos, null);
+        GridDataHandler.GridUpdate(WorldCellToFileCell(currentMouseWorldCellPos), 0);
+    }
+
+    private bool IsEmptyCell()
+    {
+        if (buildingTilemap.HasTile(currentMouseWorldCellPos) || roadTilemap.HasTile(currentMouseWorldCellPos))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }           
+    }
+
+    private bool IsNextToRoad() {
+
+        Vector2Int pos = WorldCellToFileCell(currentMouseWorldCellPos);
+
+        for (int i = 0; i < testDirections.Length; i++)
+        {
+            int x = testDirections[i][0];
+            int y = testDirections[i][1];
+            Vector2Int testPos = new Vector2Int(pos.x + x, pos.y + y);
+
+            if (GetGridAt(testPos.x, testPos.y) == 1)
+            {
+                return true;
+            }
+        }
+
+        
+        return false;
+    }
+
+    private bool IsBuilding()
+    {
+        if (buildingTilemap.HasTile(currentMouseWorldCellPos))
         {
             return true;
         }
         else
         {
-            previewTilemap.SetTile(currentCellPos, previewTile);
             return false;
-        }           
+        }
     }
 
-    private void PlaceTile()
+    public void SelectionReceiver(int index)
     {
-        if (selectedIndex < 0) return;
-        buildingTilemap.SetTile(currentCellPos, buildingTile[selectedIndex]);
-
+        selectedIndex = index;
     }
+
 }
