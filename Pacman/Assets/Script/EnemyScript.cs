@@ -23,6 +23,8 @@ public class EnemyScript : MonoBehaviour
     float speed = 7;
 
     private EnemyState enemyState = EnemyState.Normal;
+    private bool isBeingKilled = false;
+    PlayerState playerState = PlayerState.Normal;
 
     private void OnEnable()
     {
@@ -62,7 +64,7 @@ public class EnemyScript : MonoBehaviour
                     StartCoroutine(Killed());
                     enemyState = EnemyState.Dead;
                 }
-                if (PlayerState == PlayerState.Normal)
+                if (playerState == PlayerState.Normal)
                 {
                     enemyState = EnemyState.Week;
                 }
@@ -96,7 +98,7 @@ public class EnemyScript : MonoBehaviour
         {
             if(enemyState == EnemyState.Week)
             {
-                isbeingkilled = true;
+                isBeingKilled = true;
                 //enemyState = EnemyState.Dead;
             }
             else {

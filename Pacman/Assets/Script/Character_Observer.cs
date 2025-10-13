@@ -9,6 +9,7 @@ public class Character_Observer : MonoBehaviour
     [SerializeField]
     private float Speed = 5f;
 
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();

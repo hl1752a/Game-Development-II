@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EffectHandler : GridManager
 {
     private Stack<int> effects = new Stack<int>();
     private Vector2Int currentCell = new Vector2Int(0, 0);
     private Vector2Int lastCell = new Vector2Int(0, 0);
+
+    [SerializeField] private Image image;
 
     void Update()
     {
@@ -43,30 +46,40 @@ public class EffectHandler : GridManager
     }
 
     private void EffectImplement()
-    {
-        
+    {   
         while (effects.Count > 0)
         { 
             switch (effects.Pop())
             {
                 case 2: // work
-                    DataManager.AddMoney(10);
-                    Debug.Log("now money is " + DataManager.Data.Money);
+                    DataManager.Work();
                     break;
                 case 3: // cigarette
-                    Debug.Log("cigarette");
+                    DataManager.SpendMoney(5);
+                    DataManager.EffectEnergy(20);
+                    DataManager.AddXp(10);
                     break;
-                case 4: // bar
-                    Debug.Log("bar");
+                case 4: // barIn
+                    DataManager.SpendMoney(10);
+                    DataManager.EffectEnergy(30);
+                    DataManager.AddXp(15);
                     break;
                 case 5: // alcohol
-                    Debug.Log("alcohol");
+                    DataManager.SpendMoney(15);
+                    DataManager.EffectEnergy(50);
+                    DataManager.AddXp(50);
                     break;
                 case 6: // drug
-                    Debug.Log("drug");
+                    DataManager.SpendMoney(30);
+                    DataManager.EffectEnergy(150);
+                    DataManager.AddXp(100);
                     break;
-
             }
+        }
+        if (DataManager.Data.Money < 0)
+        {
+            Time.timeScale = 0f;
+            image.GetComponent<Image>().enabled = true;
         }
     }
 }

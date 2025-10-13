@@ -26,6 +26,9 @@ public class GridManager : MonoBehaviour
 
     private int selectedIndex = 2;
 
+    private int clickCount = 0;
+    private float timer = 0f;
+
     void Awake()
     {
         GridDataHandler.LoadRoad();
@@ -57,7 +60,30 @@ public class GridManager : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                RemoveTile();
+                if (clickCount == 0)
+                {
+                    timer = DataManager.Data.Level;
+                }
+
+                clickCount++;
+
+                // Check if success
+                if (clickCount >= DataManager.Data.Level)
+                {
+                    RemoveTile();
+                    clickCount = 0;
+                    timer = 0f;
+                }  
+            }
+        }
+        if (timer > 0)
+        {
+            timer -= Time.deltaTime;
+
+            // If time ran out, reset
+            if (timer <= 0)
+            {
+                clickCount = 0;
             }
         }
     }

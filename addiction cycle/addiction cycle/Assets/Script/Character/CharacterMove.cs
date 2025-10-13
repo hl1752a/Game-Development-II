@@ -7,6 +7,13 @@ public class CharacterMove : GridManager
     [SerializeField] private Vector2Int currentPos = new Vector2Int(0, 0);
     [SerializeField] private Vector2Int nextPos = new Vector2Int(0, 0);
 
+    private SpriteRenderer spriteRenderer;
+
+    void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
     void Update()
     {
         if (GridDataHandler.gameGrid != null)
@@ -19,6 +26,14 @@ public class CharacterMove : GridManager
                 lastPos = currentPos;
             }
                 
+        }
+        if (currentPos.x > nextPos.x)
+        {
+            spriteRenderer.flipX = true;
+        }
+        else
+        {
+            spriteRenderer.flipX = false;
         }
     }
 

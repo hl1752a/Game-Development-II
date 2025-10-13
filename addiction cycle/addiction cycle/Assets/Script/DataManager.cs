@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 [System.Serializable]
 public class GameData
@@ -8,7 +9,6 @@ public class GameData
     public int Level = 1;
     public int Xp = 0;
     public int Energy = 0;
-    public int Efficiency = 100;
 }
 
 public static class DataManager
@@ -21,30 +21,39 @@ public static class DataManager
     }
 
     public static void AddMoney(int amount)
-    {        
-        Data.Money += (int)Math.Round(amount * Data.Efficiency / 100d);
+    {
+        Data.Money += (int)Math.Round(amount * Data.Energy / 100d);
     }
-
+    public static void SpendMoney(int amount)
+    {
+        Data.Money -= amount;
+    }
     public static void AddXp(int amount)
     {
-        Data.Xp += amount;
+        amount += Data.Xp;
+        while (amount > 20 + 10 * Data.Level)
+        {
+            Data.Level += 1;
+            amount -= 20 + 10 * Data.Level;
+        }
+        Data.Xp = amount;
     }
 
     public static void AddDay()
     {
         Data.Day += 1;
-        AddEnergy();
-        AddEfficiency();
+        Data.Energy += 100;
 
     }
 
-    private static void AddEfficiency()
+    public static void Work()
     {
-        Data.Efficiency += Data.Energy;
+        AddMoney(10);
+        Data.Energy -= 20;   
     }
 
-    private static void AddEnergy()
+    public static void EffectEnergy(int amount)
     {
-        Data.Efficiency += 100;
+        Data.Energy += (int)Math.Round(amount * Math.Exp(-0.1535 * Data.Level));
     }
 }
