@@ -62,13 +62,13 @@ public class GridManager : MonoBehaviour
             {
                 if (clickCount == 0)
                 {
-                    timer = DataManager.Data.Level;
+                    timer = 1f;
                 }
 
                 clickCount++;
 
                 // Check if success
-                if (clickCount >= DataManager.Data.Level)
+                if (clickCount >= DataManager.Data.Level/2)
                 {
                     RemoveTile();
                     clickCount = 0;
