@@ -1,7 +1,0 @@
-empty = 0
-road = 1
-work = 2
-cigarette = 3
-bar = 4
-alcohol = 5
-drag = 6
